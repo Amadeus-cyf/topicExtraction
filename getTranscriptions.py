@@ -31,7 +31,7 @@ def get_all_transcriptions_by_offspring_id(offspringId):
         'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ5aWZhbmM3QGlsbGlub2lzLmVkdSIsImp0aSI6IjI0Y2Y2YzhhLTZhNzEtNDY1Ny05NDg5LTM2Mzc2ZWZmMzdlNSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWVpZGVudGlmaWVyIjoiNDkwYWNiZDAtNTQ4My00YzAzLWI5MDEtMWM4OWJlNWJlMTc1IiwiZXhwIjoxNTcxMjUxNDE0LCJpc3MiOiJodHRwczovL2NsYXNzdHJhbnNjcmliZS5uY3NhLmlsbGlub2lzLmVkdSIsImF1ZCI6Imh0dHBzOi8vY2xhc3N0cmFuc2NyaWJlLm5jc2EuaWxsaW5vaXMuZWR1In0.QFlDqGqUJoFP1sS6ibfNyUEIxZ1blpsU4HWmgKfTCgk',
     }
     videos = []
-    api_url = 'https://classtranscribe.ncsa.illinois.edu/api/Playlists/ByOffering/'+ offspringId
+    api_url = 'https://classtranscribe.ncsa.illinois.edu/api/Playlists/ByOffering/' + offspringId
     response = requests.get(api_url, headers=headers)
     if response.status_code == 200:
         content = json.loads(response.content.decode('utf-8'))

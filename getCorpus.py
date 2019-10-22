@@ -1,15 +1,15 @@
-import getTranscriptions as gt
+# tokenize transcriptions and remove trivial words (words with length < 3 and combining words)
+def read_process_text_to_corpus(text):
+    words = read_raw_text_to_corpus(text)
+    processed_word = []
+    com = "'"
+    for word in words:
+        if len(word) < 3 or com in word:
+            continue
+        processed_word.append(word)
+    return processed_word
 
 
-def read_text_to_corpus(text):
+def read_raw_text_to_corpus(text):
     words = text.split(' ')
     return words
-
-
-def main():
-    text = gt.get_transcription_by_id('5b3ee68c-5407-4a1f-a330-e55d5d239ffb')
-    corpus = read_text_to_corpus(text)
-
-
-if __name__ == '__main__':
-    main()
