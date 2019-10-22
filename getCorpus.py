@@ -1,20 +1,15 @@
-import nltk
-import getTranscriptions as gt 
+import getTranscriptions as gt
 
-def readTextToCorpus(text):
-    return nltk.word_tokenize(text)
 
-def removeWordsLessThan3(corpus):
-    filterCorpus = []
-    for word in corpus:
-        if len(word) > 3:
-            filterCorpus.append(word)
-    return filterCorpus
+def read_text_to_corpus(text):
+    words = text.split(' ')
+    return words
+
 
 def main():
-    text = gt.getTranscriptionById('5b3ee68c-5407-4a1f-a330-e55d5d239ffb')
-    corpus = readTextToCorpus(text)
-    corpus = removeWordsLessThan3(corpus)
+    text = gt.get_transcription_by_id('5b3ee68c-5407-4a1f-a330-e55d5d239ffb')
+    corpus = read_text_to_corpus(text)
+
 
 if __name__ == '__main__':
     main()
