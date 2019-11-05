@@ -4,7 +4,7 @@ class TopicModel:
 
     # create model given transcriptions and background model
     def create_model(self, transcriptions, background):
-        top_background_word = background.get_top_freq_words(30)
+        top_background_word = background.get_top_freq_words(100)
         for word in transcriptions:
             if word not in self.word_map:
                 self.size += 1
