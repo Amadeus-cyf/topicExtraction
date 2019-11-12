@@ -7,19 +7,19 @@ import random
 class Extraction:
     topic_model = None
     background_model = None
-    word_topic_prob = {}       # P(w|topic_model)
-    hidden_word_prob = {}      # P(z|w)
-    prob_z_0 = 0.0             # topic model
-    prob_z_1 = 0.0             # background model
-    topic_prob = 0.8           # probability of using topic model, 1-topic_prob is probability of using background model
+    word_topic_prob = {}                    # P(w|topic_model)
+    hidden_word_prob = {}                   # P(z|w)
+    prob_z_0 = 0.0                          # topic model
+    prob_z_1 = 0.0                          # background model
+    topic_prob = 0.6                       # probability of using topic model, 1-topic_prob is probability of using background model
     mixture_word_topic_prob = {}            # probability of word in mixture model, map word to prob 
-    transcription_id = "c0bfea1c-8550-4dcf-a04c-0c4f3d6d76e2"
-    # cs 357 for test
+    transcription_id = "b7c99a7c-0223-44f8-ada1-ea538f3f7d54"
+    # cs 374 for test
 
     # set the background model of the lda
     def set_background(self):
-        #transcriptions_1 = get_transcription_by_id("a6f09665-6ef6-4a23-bba6-5ddc2402b01a")
-        transcriptions_2 = get_transcription_by_id("1f759a40-b880-4b25-a1b9-5007a7d0a4c0")
+        #transcriptions_1 = get_transcription_by_id("fee4abaa-f0c4-427e-a591-46047c95a781")
+        transcriptions_2 = get_transcription_by_id("de12a60b-afaf-462a-990b-507ffef68f0b")
         #transcription_tokens_1 = read_process_text_to_corpus(transcriptions_1)
         transcription_tokens_2 = read_process_text_to_corpus(transcriptions_2)
         self.background_model = Background()
@@ -37,6 +37,7 @@ class Extraction:
     def init_word_topic_prob(self):
         for word in self.topic_model.word_map.keys():
             self.word_topic_prob[word] = self.topic_model.word_map[word] / self.topic_model.size
+        #print(sorted(self.word_topic_prob.items(), key=lambda x: x[1], reverse=True))
 
     def init_hidden_topic_prob(self):
         for word in self.topic_model.word_map.keys():
@@ -57,20 +58,19 @@ class Extraction:
             total += self.topic_model.word_map[wo] * self.hidden_word_prob[wo]
         self.word_topic_prob[word] = self.topic_model.word_map[word] * self.hidden_word_prob[word] / total
 
-    # maximum likelihood estimate
+    # maximum likelihood estimate of P(w|topic) of given word
+    # current is the initial P(z=0|w)
+    # gap is the convergence
     def maximum_estimate(self, current, gap, word):
         prev = 0.0
-        words = self.topic_model.word_map.keys()
+        #words = self.topic_model.word_map.keys()
         while True:
-            for wo in words:
-                self.expectation(wo)
-            for wo in words:
-                self.maximization(wo)
+            self.expectation(word)
+            self.maximization(word)
             prev = current
             current = self.word_topic_prob[word]
             if current - prev < gap:
                 break
-            print(word)
         return self.word_topic_prob[word]
 
     # get top probability words from the topic model
@@ -121,6 +121,7 @@ if __name__ == "__main__":
     extract.init_word_topic_prob()
     extract.init_hidden_topic_prob()
     word_prob_map = {}
+    # do the maximum-estimate for each word in the transcirptions
     for w in extract.topic_model.word_map:
         init = extract.topic_model.word_map[w] / extract.topic_model.size
         word_prob_map[w] = extract.maximum_estimate(init, 0.000001, w)
@@ -128,5 +129,5 @@ if __name__ == "__main__":
         extract.init_hidden_topic_prob()
     extract.get_word_prob_from_mixture_model()
     topics = extract.get_top_topic()
-    #print(extract.mixture_word_topic_prob)
+    #print(sorted(extract.word_topic_prob.items(), key =lambda x: x[1], reverse=True))
     print(topics)
