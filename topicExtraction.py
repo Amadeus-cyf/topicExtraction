@@ -92,7 +92,6 @@ class Extraction:
 
     # calculated p(z=0|w), which is stored in hidden_word_prob
     def expectation(self, word):
-        #hidden_word_prob[word] = (topic_coverage * word_topic_prob[word]) / (self.topic_prob/3 * word_topic_prob[word] + (1-self.topic_prob) * background_prob)
         # calculate P(Zd,w = topic j) j could be topic 1, topic 2 or topic 3
         total_topic_model_prob_sum = 0.0
         if word in self.word_topic_prob_1:
@@ -143,6 +142,11 @@ class Extraction:
         self.topic_coverage_1 = word_prob_sum_1/total_word_prob_sum
         self.topic_coverage_2 = word_prob_sum_2/total_word_prob_sum
         self.topic_coverage_3 = word_prob_sum_3/total_word_prob_sum
+        coverage_sum = self.topic_coverage_1 + self.topic_coverage_2 + self.topic_coverage_3
+        # normalize topic coverage let them sum to one
+        self.topic_coverage_1 /= coverage_sum
+        self.topic_coverage_2 /= coverage_sum
+        self.topic_coverage_3 /= coverage_sum
         # calculate P(w | topic j)
         self.word_topic_prob_1[word] = self.document_words[word] * (1 - self.background_word_topic_prob[word]) * self.word_topic_prob_1[word] / word_prob_sum_1
         self.word_topic_prob_2[word] = self.document_words[word] * (1 - self.background_word_topic_prob[word]) * self.word_topic_prob_2[word] / word_prob_sum_2
