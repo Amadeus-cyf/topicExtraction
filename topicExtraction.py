@@ -9,45 +9,45 @@ Using PLSA algorithms to generate words from multiple topics in a transcription,
 The recommended topics are chosen from top words with highest probability
 '''
 class Extraction:
-    document_words = None                   # map word in transcription to count
+    document_words = None                       # map word in transcription to count
     vocab = 0
     topic_model_1 = None                    
     topic_model_2 = None
     topic_model_3 = None
     background_model = None
-    background_word_topic_prob = {}         # P(w|B)
-    word_topic_prob_1 = {}                  # P(w|topic_model_1)
-    hidden_word_prob_1 = {}                 # P(z_0_1|w)
-    word_topic_prob_2 = {}                  # P(w|topic_model_2)
-    hidden_word_prob_2= {}                  # P(z_0_2|w)
-    word_topic_prob_3 = {}                  # P(w|topic_model_3)
-    hidden_word_prob_3 = {}                 # P(z_0_3|w)
-    prob_z_1 = 0.0                          # background model
+    background_word_topic_prob = {}             # P(w|B)
+    word_topic_prob_1 = {}                      # P(w|topic_model_1)
+    hidden_word_prob_1 = {}                     # P(z_0_1|w)
+    word_topic_prob_2 = {}                      # P(w|topic_model_2)
+    hidden_word_prob_2= {}                      # P(z_0_2|w)
+    word_topic_prob_3 = {}                      # P(w|topic_model_3)
+    hidden_word_prob_3 = {}                     # P(z_0_3|w)
+    hidden_prob_background = {}                 # P(z_1|w)
     topic_coverage_1 = 1/3                
     topic_coverage_2 = 1/3
     topic_coverage_3 = 1/3
     topic_prob = 0.8                            # total probability of all topic models, 1-topic_prob is probability of using background model
-    mixture_word_topic_prob_1 = {}            # probability of word in mixture model, map word to prob 
+    mixture_word_topic_prob_1 = {}              # probability of word in mixture model, map word to prob 
     mixture_word_topic_prob_2 = {}
     mixture_word_topic_prob_3 = {}
-    transcription_id = "9a2f0b4d-d4bd-4e61-9f97-758006f7af37"
+    transcription_id = "fa62d651-7172-424a-8853-0fd67b8b80c1"
     # 374"b7c99a7c-0223-44f8-ada1-ea538f3f7d54"
     transcription_tokens = None
     # cs 125 for test
 
     # set the background model of the lda
     def set_background(self):
-        transcriptions_1 = get_transcription_by_id("a3579844-1afe-4727-8a4c-e80d04e507a0") 
+        #transcriptions_1 = get_transcription_by_id("a3579844-1afe-4727-8a4c-e80d04e507a0") 
         # 374 "fee4abaa-f0c4-427e-a591-46047c95a781"
-        #transcriptions_2 = get_transcription_by_id("9a2f0b4d-d4bd-4e61-9f97-758006f7af37")
+        transcriptions_2 = get_transcription_by_id("9a2f0b4d-d4bd-4e61-9f97-758006f7af37")
         #transcriptions_3 = get_transcription_by_id("fa62d651-7172-424a-8853-0fd67b8b80c1")
         # 374 "de12a60b-afaf-462a-990b-507ffef68f0b"
-        transcription_tokens_1 = read_process_text_to_corpus(transcriptions_1)
-        #transcription_tokens_2 = read_process_text_to_corpus(transcriptions_2)
+        #transcription_tokens_1 = read_process_text_to_corpus(transcriptions_1)
+        transcription_tokens_2 = read_process_text_to_corpus(transcriptions_2)
         #transcription_tokens_3 = read_process_text_to_corpus(transcriptions_3)
         self.background_model = Background()
-        self.background_model.add_word_to_background(transcription_tokens_1)
-        #self.background_model.add_word_to_background(transcription_tokens_2)
+        #self.background_model.add_word_to_background(transcription_tokens_1)
+        self.background_model.add_word_to_background(transcription_tokens_2)
         #self.background_model.add_word_to_background(transcription_tokens_3)
         # set background word prob
         for word in self.background_model.word_map:
@@ -75,7 +75,7 @@ class Extraction:
         # create topic model 3 and input last 1/3 transcriptions text
         self.topic_model_3 = TopicModel()
         self.topic_model_3.create_model(sub_transcriptions_3, self.background_model)
-        print(self.topic_model_1.word_map == self.topic_model_2.word_map)
+        #print(self.topic_model_1.word_map == self.topic_model_2.word_map)
 
     def init_word_topic_prob(self):
         # initialize topic model 1
@@ -96,6 +96,8 @@ class Extraction:
             self.hidden_word_prob_2[word] = 0.0
         for word in self.topic_model_3.word_map.keys():
             self.hidden_word_prob_1[word] = 0.0
+        for word in self.background_model.word_map.keys():
+            self.hidden_prob_background[word] = 0.0
 
     # calculated p(z=0|w), which is stored in hidden_word_prob
     def expectation(self, word):
@@ -106,39 +108,39 @@ class Extraction:
             total_topic_model_prob_sum += self.topic_coverage_1 * self.word_topic_prob_1[word]
         else:
              # word not in first topic input text
-            total_topic_model_prob_sum += self.topic_coverage_1 * 0.0001
+            total_topic_model_prob_sum += self.topic_coverage_1 * 0.001
         if word in self.word_topic_prob_2:
              # word in second topic input text
             total_topic_model_prob_sum += self.topic_coverage_2 * self.word_topic_prob_2[word]
         else:
              # word not in second topic input text
-            total_topic_model_prob_sum += self.topic_coverage_2 * 0.0001
+            total_topic_model_prob_sum += self.topic_coverage_2 * 0.001
         if word in self.word_topic_prob_3:
              # word in third topic input text
             total_topic_model_prob_sum += self.topic_coverage_3 * self.word_topic_prob_3[word]
         else:
              # word not in third topic input text
-            total_topic_model_prob_sum += self.topic_coverage_3 * 0.0001
+            total_topic_model_prob_sum += self.topic_coverage_3 * 0.001
         # smoothing for non-existing word
         if word not in self.word_topic_prob_1:
-            self.word_topic_prob_1[word] = 0.0001
+            self.word_topic_prob_1[word] = 0.001
         if word not in self.word_topic_prob_2:
-            self.word_topic_prob_2[word] = 0.0001
+            self.word_topic_prob_2[word] = 0.001
         if word not in self.word_topic_prob_3:
-            self.word_topic_prob_3[word] = 0.0001
-        self.word_topic_prob_1[word] = self.topic_coverage_1 * self.word_topic_prob_1[word]/total_topic_model_prob_sum
-        self.word_topic_prob_2[word] = self.topic_coverage_2 * self.word_topic_prob_2[word]/total_topic_model_prob_sum
-        self.word_topic_prob_3[word] = self.topic_coverage_3 * self.word_topic_prob_3[word]/total_topic_model_prob_sum
+            self.word_topic_prob_3[word] = 0.001
+        self.hidden_word_prob_1[word] = self.topic_coverage_1 * self.word_topic_prob_1[word]/total_topic_model_prob_sum
+        self.hidden_word_prob_2[word] = self.topic_coverage_2 * self.word_topic_prob_2[word]/total_topic_model_prob_sum
+        self.hidden_word_prob_3[word] = self.topic_coverage_3 * self.word_topic_prob_3[word]/total_topic_model_prob_sum
         # calculate P(Zd,w = B)
-        if word not in self.background_model.word_map:
+        if word not in self.background_word_topic_prob:
             # word not in background model
             word_prob_in_background = 0.0001
         else:
             # word in background model
-            word_prob_in_background = self.background_model.word_map[word] / self.background_model.size
+            word_prob_in_background = self.background_word_topic_prob[word]
         # calculate P(Zd,w = B) which is same as P(w|B)
         background_prob = (1-self.topic_prob) * word_prob_in_background
-        self.background_word_topic_prob[word] = background_prob / (background_prob + total_topic_model_prob_sum)
+        self.hidden_prob_background[word] = background_prob / (background_prob + total_topic_model_prob_sum * self.topic_prob)
         
 
     # calculated p(word|topic_model), which is stored in word_topic_prob
@@ -150,9 +152,9 @@ class Extraction:
         self.word_topic_prob[word] = self.topic_model.word_map[word] * self.hidden_word_prob[word] / total
         '''
         # caulculate topic coverage for each topic
-        word_prob_sum_1 = self.get_one_topic_model_prob_sum(word, self.topic_model_1, self.word_topic_prob_1)
-        word_prob_sum_2 = self.get_one_topic_model_prob_sum(word, self.topic_model_2, self.word_topic_prob_2)
-        word_prob_sum_3 = self.get_one_topic_model_prob_sum(word, self.topic_model_3, self.word_topic_prob_3)
+        word_prob_sum_1 = self.get_one_topic_model_prob_sum(word, self.topic_model_1, self.hidden_word_prob_1)
+        word_prob_sum_2 = self.get_one_topic_model_prob_sum(word, self.topic_model_2, self.hidden_word_prob_2)
+        word_prob_sum_3 = self.get_one_topic_model_prob_sum(word, self.topic_model_3, self.hidden_word_prob_3)
         total_word_prob_sum = word_prob_sum_1 + word_prob_sum_2 + word_prob_sum_2
         # calculate topic coverage for each topic model
         self.topic_coverage_1 = word_prob_sum_1/total_word_prob_sum
@@ -164,22 +166,22 @@ class Extraction:
         self.topic_coverage_2 /= coverage_sum
         self.topic_coverage_3 /= coverage_sum
         # calculate P(w | topic j)
-        self.word_topic_prob_1[word] = self.document_words[word] * (1 - self.background_word_topic_prob[word]) * self.word_topic_prob_1[word] / word_prob_sum_1
-        self.word_topic_prob_2[word] = self.document_words[word] * (1 - self.background_word_topic_prob[word]) * self.word_topic_prob_2[word] / word_prob_sum_2
-        self.word_topic_prob_3[word] = self.document_words[word] * (1 - self.background_word_topic_prob[word]) * self.word_topic_prob_3[word] / word_prob_sum_3
+        self.word_topic_prob_1[word] = self.document_words[word] * (1 - self.hidden_prob_background[word]) * self.hidden_word_prob_1[word] / word_prob_sum_1
+        self.word_topic_prob_2[word] = self.document_words[word] * (1 - self.hidden_prob_background[word]) * self.hidden_word_prob_2[word] / word_prob_sum_2
+        self.word_topic_prob_3[word] = self.document_words[word] * (1 - self.hidden_prob_background[word]) * self.hidden_word_prob_3[word] / word_prob_sum_3
 
     # get sum of probs of all words in transcriotions in one topic model
-    def get_one_topic_model_prob_sum(self, word, topic_model, word_topic_prob):
+    def get_one_topic_model_prob_sum(self, word, topic_model, hidden_word_prob):
         word_prob_sum = 0.0
         for word in self.document_words:
             if word not in self.document_words:
                 continue
-            if word not in self.background_word_topic_prob:
-                self.background_word_topic_prob[word] = 0.0
+            if word not in self.hidden_prob_background:
+                self.hidden_prob_background[word] = 0.001
             # smoothing
-            if word not in word_topic_prob:
-                word_topic_prob[word] = 0.0001
-            word_prob_sum += self.document_words[word] * (1 - self.background_word_topic_prob[word]) * word_topic_prob[word]
+            if word not in hidden_word_prob:
+                hidden_word_prob[word] = 0.001
+            word_prob_sum += self.document_words[word] * (1 - self.hidden_prob_background[word]) * hidden_word_prob[word]
         return word_prob_sum
 
     # maximum likelihood estimate of P(w|topic) of given word
@@ -206,14 +208,19 @@ class Extraction:
     # get word prob from mixture model
     def get_word_prob_from_mixture_model(self):
         for word in self.document_words:
+            #print(word)
             # word only appears in background model
             init = self.document_words[word] / self.vocab
             if init == 0:
                 init = 0.001
             topic_1_prob, topic_2_prob, topic_3_prob= self.maximum_estimate(word, init, init, init, 0.000001)
-            self.mixture_word_topic_prob_1[word] = topic_1_prob * self.topic_prob + + (1-self.topic_prob) * self.background_word_topic_prob[word]
-            self.mixture_word_topic_prob_2[word] = topic_2_prob * self.topic_prob + + (1-self.topic_prob) * self.background_word_topic_prob[word]
-            self.mixture_word_topic_prob_3[word] = topic_3_prob * self.topic_prob + + (1-self.topic_prob) * self.background_word_topic_prob[word]
+            if word not in self.background_word_topic_prob:
+                self.background_word_topic_prob[word] = 0.001
+            self.mixture_word_topic_prob_1[word] = topic_1_prob * self.topic_prob + (1-self.topic_prob) * self.background_word_topic_prob[word]
+            self.mixture_word_topic_prob_2[word] = topic_2_prob * self.topic_prob + (1-self.topic_prob) * self.background_word_topic_prob[word]
+            self.mixture_word_topic_prob_3[word] = topic_3_prob * self.topic_prob + (1-self.topic_prob) * self.background_word_topic_prob[word]
+            self.init_hidden_topic_prob()
+            self.init_word_topic_prob()
     
     '''
     # get top topics from mixture model
