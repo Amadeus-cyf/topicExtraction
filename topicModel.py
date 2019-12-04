@@ -1,6 +1,8 @@
 class TopicModel:
-    word_map = {}           # map word to word count in the topic model
-    size = 0
+    
+    def __init__(self):
+        self.word_map = {}           # map word to word count in the topic model
+        self.size = 0
 
     # create model given transcriptions and background model
     def create_model(self, transcriptions, background):
