@@ -31,11 +31,11 @@ class Extraction:
     mixture_word_topic_prob_2 = {}
     mixture_word_topic_prob_3 = {}
     transcription_id = "fa62d651-7172-424a-8853-0fd67b8b80c1"
-    # 374"b7c99a7c-0223-44f8-ada1-ea538f3f7d54"
+    # 374 "b7c99a7c-0223-44f8-ada1-ea538f3f7d54"
     transcription_tokens = None
     # cs 125 for test
 
-    # set the background model of the lda
+    # set the background model of the plsa
     def set_background(self):
         #transcriptions_1 = get_transcription_by_id("a3579844-1afe-4727-8a4c-e80d04e507a0") 
         # 374 "fee4abaa-f0c4-427e-a591-46047c95a781"
@@ -46,14 +46,14 @@ class Extraction:
         transcription_tokens_2 = read_process_text_to_corpus(transcriptions_2)
         #transcription_tokens_3 = read_process_text_to_corpus(transcriptions_3)
         self.background_model = Background()
-        #self.background_model.add_word_to_background(transcription_tokens_1)
+        # self.background_model.add_word_to_background(transcription_tokens_1)
         self.background_model.add_word_to_background(transcription_tokens_2)
         #self.background_model.add_word_to_background(transcription_tokens_3)
         # set background word prob
         for word in self.background_model.word_map:
             self.background_word_topic_prob[word] = self.background_model.word_map[word] / self.background_model.size
 
-    # set the topic model
+    # set the topic model of the plsa
     def set_topic_model(self):
         transcriptions = get_transcription_by_id(self.transcription_id)
         self.transcription_tokens = read_process_text_to_corpus(transcriptions)
@@ -68,7 +68,7 @@ class Extraction:
         sub_transcriptions_3 = self.transcription_tokens[length*2:]
         self.topic_model_1 = TopicModel()
         self.topic_model_1.create_model(sub_transcriptions_1, self.background_model)
-        #print(self.topic_model.word_map)
+        # print(self.topic_model.word_map)
         # create topic model 2 and input second 1/3 transcriptions text
         self.topic_model_2 = TopicModel()
         self.topic_model_2.create_model(sub_transcriptions_2, self.background_model)
