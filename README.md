@@ -1,2 +1,2 @@
 ## topicExtraction
-A really really simple and trash topic extraction model
+A really really complex and strong topic extraction model created by amadeuscyf!
